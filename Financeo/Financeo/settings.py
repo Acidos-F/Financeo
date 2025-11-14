@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'finance.apps.FinanceConfig',
     'reports.apps.ReportsConfig',
     'users.apps.UsersConfig',
+    'tailwind',
+    'theme',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +130,6 @@ STATICFILES_DIRS = (
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TAILWIND_APP_NAME = "theme"
+TAILWIND_CSS_PATH = 'css/dist/styles.css'

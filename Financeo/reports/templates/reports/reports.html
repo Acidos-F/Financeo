@@ -12,7 +12,7 @@
     <div class="flex min-h-screen">
         <aside class="w-60 bg-[#3a4a46] text-gray-300 flex flex-col">
             <div class="flex items-center p-6">
-                <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="w-10 h-10 rounded-full mr-3">
                 <span class="font-semibold text-white">{{ user.username }}</span>
             </div>
 
@@ -22,8 +22,8 @@
                 <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Transactions</a>
                 <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Category</a>
                 <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Budgets</a>
-                <a href="#" class="block py-2 px-4 rounded bg-[#2a3633] text-white font-medium">Reports</a>
-                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Settings</a>
+                <a href="{% url 'reports' %}" class="block py-2 px-4 rounded bg-[#2a3633] text-white font-medium">Reports</a>
+                <a href="{% url 'settings' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Settings</a>
             </nav>
 
             <div class="p-4">

@@ -1,0 +1,129 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings</title>
+    {% tailwind_css %}
+</head>
+<body class="bg-[#318f76]">
+
+    <div class="flex min-h-screen">
+        <aside class="w-60 bg-[#3a4a46] text-gray-300 flex flex-col">
+            <div class="flex items-center p-6">
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="w-10 h-10 rounded-full mr-3">
+                <span class="font-semibold text-white">{{ user.username }}</span>
+            </div>
+
+            <nav class="flex-1 px-4 py-2 space-y-2">
+                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Dashboard</a>
+                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Accounts</a>
+                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Transactions</a>
+                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Category</a>
+                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Budgets</a>
+                <a href="{% url 'reports' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Reports</a>
+                <a href="{% url 'settings' %}" class="block py-2 px-4 rounded bg-[#2a3633] text-white font-medium">Settings</a>
+            </nav>
+
+            <div class="p-4">
+                <a href="#" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Log-out</a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-10">
+
+            {% if messages %}
+                <div class="mb-8">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="flex items-center mb-8">
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="w-24 h-24 rounded-full mr-5 shadow-md">
+                
+                <div class="bg-white rounded-lg shadow px-5 py-2">
+                    <span class="text-2xl font-bold text-gray-800">{{ user.username }}</span>
+                </div>
+
+                <svg class="w-8 h-8 text-white ml-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <div class="bg-gray-100 rounded-lg shadow-xl p-8 max-w-2xl">
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Username</label>
+                        <div class="flex items-center justify-between space-x-4">
+                            {{ username_form.username }}
+                            <button type="submit" name="update_username" class="font-semibold text-gray-700 underline whitespace-nowrap hover:text-black">Update Username</button>
+                        </div>
+                        {{ username_form.username.errors }}
+                    </div>
+                </form>
+
+                <hr class="border-gray-300 my-6">
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Profile Picture</label>
+                        <div class="flex items-center justify-between space-x-4">
+                            {{ profile_picture_form.profile_picture }}
+                            <button type="submit" name="update_profile_picture" class="font-semibold text-gray-700 underline whitespace-nowrap hover:text-black">Update Picture</button>
+                        </div>
+                        {{ profile_picture_form.profile_picture.errors }}
+                    </div>
+                </form>
+
+                <hr class="border-gray-300 my-6">
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">E-Mail Address</label>
+                        <p class="text-gray-900 mb-3">{{ user.email }}</p>
+                        
+                        <div class="flex items-center justify-between space-x-4">
+                            {{ email_form.email }}
+                            <button type="submit" name="update_email" class="font-semibold text-gray-700 underline whitespace-nowrap hover:text-black">Update E-mail</button>
+                        </div>
+                        {{ email_form.email.errors }}
+                    </div>
+                </form>
+
+                <hr class="border-gray-300 my-6">
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Password</label>
+                        <div class="space-y-4">
+                            {{ password_form.old_password }}
+                            {{ password_form.old_password.errors }}
+                            {{ password_form.new_password1 }}
+                            {{ password_form.new_password1.errors }}
+                            {{ password_form.new_password2 }}
+                            {{ password_form.new_password2.errors }}
+                        </div>
+                        <div class="flex items-center justify-between mt-4">
+                            <p class="text-gray-900 tracking-wider text-lg"></p>
+                            <button type="submit" name="change_password" class="font-semibold text-gray-700 underline hover:text-black">Change Password</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

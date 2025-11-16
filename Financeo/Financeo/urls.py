@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from users import views
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -24,6 +25,8 @@ urlpatterns = [
     path('', include('finance.urls')),
     path('reports/', include('reports.urls')),
     path('settings/', include('settings.urls')),
+    path('', views.login_view, name='login'),
+    path('signup/', views.signup_view, name='signup'),
 ]
 
 if settings.DEBUG:

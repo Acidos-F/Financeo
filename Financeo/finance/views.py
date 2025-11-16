@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
-from finance.models import Transaction, Account, Category
+from finance.models import Transaction, Account, Category, AccountType
+from .forms import AccountForm
 from django.utils import timezone
 from datetime import timedelta
 
@@ -47,3 +48,27 @@ def dashboard_view(request):
     }
 
     return render(request, 'finance/dashboard.html', context)
+
+@login_required
+def accounts_view(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create':
+            form = AccountForm(request.POST)
+            if form.is_valid():
+                account = form.save(commit=False)
+                account.user = request.user
+                account.save()
+        elif action == 'delete':
+            account_id = request.POST.get('account_id')
+            Account.objects.filter(id=account_id, user=request.user).delete()
+        return redirect('accounts')
+
+    accounts = Account.objects.filter(user=request.user)
+    form = AccountForm()
+
+    context = {
+        'accounts': accounts,
+        'form': form,
+    }
+    return render(request, 'finance/accounts.html', context)

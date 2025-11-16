@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'settings.apps.SettingsConfig',
     'tailwind',
     'theme',
+    'matplotlib',
 ]
 
 MIDDLEWARE = [

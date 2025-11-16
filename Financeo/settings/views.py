@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from .forms import EmailUpdateForm, CustomPasswordChangeForm, UsernameUpdateForm, ProfilePictureUpdateForm
 
+@login_required
 def settings_view(request):
     if request.method == 'POST':
         if 'update_username' in request.POST:

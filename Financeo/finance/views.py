@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
 from finance.models import Transaction, Account, Category, AccountType
-from .forms import AccountForm
+from .forms import AccountForm, UpdateAccountForm
 from django.utils import timezone
 from datetime import timedelta
 
@@ -62,6 +62,9 @@ def accounts_view(request):
         elif action == 'delete':
             account_id = request.POST.get('account_id')
             Account.objects.filter(id=account_id, user=request.user).delete()
+        elif action == 'update':
+            account_id = request.POST.get('account_id')
+            return redirect('update_account', account_id=account_id)
         return redirect('accounts')
 
     accounts = Account.objects.filter(user=request.user)
@@ -72,3 +75,15 @@ def accounts_view(request):
         'form': form,
     }
     return render(request, 'finance/accounts.html', context)
+
+@login_required
+def update_account(request, account_id):
+    account = get_object_or_404(Account, id=account_id, user=request.user)
+    if request.method == 'POST':
+        form = UpdateAccountForm(request.POST, instance=account)
+        if form.is_valid():
+            form.save()
+            return redirect('accounts')
+    else:
+        form = UpdateAccountForm(instance=account)
+    return render(request, 'finance/update_account.html', {'form': form, 'account': account})

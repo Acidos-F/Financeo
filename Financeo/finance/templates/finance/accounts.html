@@ -10,6 +10,7 @@
 <body class="bg-[#318f76]">
 
     <div class="flex min-h-screen">
+        {% block content %}
         <aside class="w-60 bg-[#3a4a46] text-gray-300 flex flex-col">
             <div class="flex items-center p-6">
                 <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="w-10 h-10 rounded-full mr-3">
@@ -69,6 +70,14 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <form method="post" class="inline">
                                             {% csrf_token %}
+                                            <input type="hidden" name="action" value="update">
+                                            <input type="hidden" name="account_id" value="{{ account.id }}">
+                                            <button type="submit" class="text-blue-600 hover:text-blue-900">Update</button>
+                                        </form>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <form method="post" class="inline">
+                                            {% csrf_token %}
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="account_id" value="{{ account.id }}">
                                             <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
@@ -84,6 +93,7 @@
                     </table>
                 </div>
             </div>
+            {% endblock %}
         </main>
     </div>
 

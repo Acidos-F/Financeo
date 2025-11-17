@@ -22,9 +22,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
-    path('', include('finance.urls')), # Finance dashboard is now the root
+    path('dashboard/', include('finance.urls')),
+    path('categories/', include('categories.urls')),
     path('reports/', include('reports.urls')),
     path('settings/', include('settings.urls')),
+    path('transactions/', include('transactions.urls')),
 ]
 
 if settings.DEBUG:

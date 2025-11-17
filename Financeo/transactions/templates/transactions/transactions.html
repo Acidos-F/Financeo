@@ -1,0 +1,322 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if action %}{{ action }} Transaction{% elif show_transactions %}Transactions{% elif is_delete %}Delete Transaction{% endif %}</title>
+    {% tailwind_css %}
+</head>
+<body class="bg-[#318f76]">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-60 bg-[#3a4a46] text-gray-300 flex flex-col sticky top-0 h-screen">
+            <div class="flex items-center p-6">
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="w-10 h-10 rounded-full mr-3">
+                <span class="font-semibold text-white">{{ user.username }}</span>
+            </div>
+
+            <nav class="flex-1 px-4 py-2 space-y-2">
+                <a href="{% url 'dashboard' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Dashboard</a>
+                <a href="{% url 'accounts' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Accounts</a>
+                <a href="{% url 'transactions' %}" class="block py-2 px-4 rounded bg-[#2a3633] text-white font-medium">Transactions</a>
+                <a href="{% url 'categories' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Category</a>
+                <a href="{% url 'budgets' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Budgets</a>
+                <a href="{% url 'reports' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Reports</a>
+                <a href="{% url 'settings' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Settings</a>
+            </nav>
+
+            <div class="p-4">
+                <a href="{% url 'logout' %}" class="block py-2 px-4 rounded hover:bg-[#2a3633]/50">Log-out</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-10 overflow-y-auto">
+
+            <!-- Transaction List View -->
+            {% if show_transactions %}
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-white">Transactions</h1>
+                <a href="{% url 'create_transaction' %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add Transaction</a>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow p-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <input type="text" id="searchInput" value="{{ search_query }}" placeholder="Search by description or category..." class="p-2 rounded w-64 border flex-1">
+                    <button type="button" id="filterAll" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">All</button>
+                    <button type="button" id="filterIncome" class="px-4 py-2 bg-green-200 rounded hover:bg-green-300">Income</button>
+                    <button type="button" id="filterExpense" class="px-4 py-2 bg-red-200 rounded hover:bg-red-300">Expense</button>
+                    <button type="button" id="searchButton" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Search</button>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">All Transactions</h2>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto" id="transactionTable">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-2 px-4">Date</th>
+                                <th class="text-left py-2 px-4">Account</th>
+                                <th class="text-left py-2 px-4">Category</th>
+                                <th class="text-left py-2 px-4">Description</th>
+                                <th class="text-right py-2 px-4">Amount</th>
+                                <th class="text-center py-2 px-4 w-48">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            {% for transaction in transactions %}
+                                <tr class="border-b hover:bg-gray-50" data-type="{{ transaction.type }}">
+                                    <td class="py-2 px-4 text-gray-600 whitespace-nowrap">{{ transaction.date|date:"M d, Y" }}</td>
+                                    <td class="py-2 px-4 text-gray-600">{{ transaction.account.name }}</td>
+                                    <td class="py-2 px-4 text-gray-600">{{ transaction.category.name }}</td>
+                                    <td class="py-2 px-4 text-gray-600">{{ transaction.description|default:"-" }}</td>
+                                    <td class="py-2 px-4 font-bold text-right whitespace-nowrap {% if transaction.type == 'INCOME' %}text-green-500{% else %}text-red-500{% endif %}">
+                                        {% if transaction.type == 'INCOME' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                                    </td>
+                                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                                        <div class="flex gap-2 justify-center items-center">
+                                            <a href="{% url 'update_transaction' transaction.id %}" class="inline-block px-4 py-2 bg-red-200 rounded hover:bg-red-300">
+                                                Edit
+                                            </a>
+                                            <a href="{% url 'delete_transaction' transaction.id %}" class="inline-block px-4 py-2 bg-green-200 rounded hover:bg-green-300">
+                                                Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-gray-500 py-8">No transactions found. <a href="{% url 'create_transaction' %}" class="text-blue-600 hover:underline">Create one</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Create/Edit Transaction Form -->
+            {% if action %}
+            <div class="max-w-3xl mx-auto">
+                <h1 class="text-4xl font-bold text-white mb-8 drop-shadow-lg">{{ action }} Transaction</h1>
+
+                <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+                    <div class="p-6">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Account</label>
+                                    {{ form.account }}
+                                    {{ form.account.errors }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                    {{ form.type }}
+                                    {{ form.type.errors }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                    {{ form.category }}
+                                    {{ form.category.errors }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                                    {{ form.amount }}
+                                    {{ form.amount.errors }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                    {{ form.date }}
+                                    {{ form.date.errors }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    {{ form.description }}
+                                    {{ form.description.errors }}
+                                </div>
+                            </div>
+                            <div class="mt-6 flex gap-3">
+                                <button type="submit" class="flex-1 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-blue-800">
+                                    {{ action }} Transaction
+                                </button>
+                                <a href="{% url 'transactions' %}" class="flex-1 px-8 py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center border-2 border-gray-800">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Delete Transaction View -->
+            {% if is_delete %}
+            <div class="max-w-3xl mx-auto">
+                <h1 class="text-4xl font-bold text-white mb-8 drop-shadow-lg">Delete Transaction</h1>
+
+                <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+                    <!-- Warning Banner -->
+                    <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-lg font-semibold text-red-800">Confirm Deletion</h3>
+                                <p class="mt-1 text-sm text-red-700">Are you sure you want to delete this transaction? This action cannot be undone.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transaction Details -->
+                    <div class="p-6">
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Transaction Details
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="text-gray-600 font-medium">Date:</span>
+                                    <span class="text-gray-900">{{ transaction.date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="text-gray-600 font-medium">Account:</span>
+                                    <span class="text-gray-900">{{ transaction.account.name }}</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="text-gray-600 font-medium">Category:</span>
+                                    <span class="text-gray-900">{{ transaction.category.name }}</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="text-gray-600 font-medium">Type:</span>
+                                    <span class="px-3 py-1 rounded-full text-sm font-medium {% if transaction.type == 'INCOME' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ transaction.get_type_display }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="text-gray-600 font-medium">Amount:</span>
+                                    <span class="text-2xl font-bold {% if transaction.type == 'INCOME' %}text-green-600{% else %}text-red-600{% endif %}">
+                                        ${{ transaction.amount|floatformat:2 }}
+                                    </span>
+                                </div>
+                                {% if transaction.description %}
+                                    <div class="py-2">
+                                        <span class="text-gray-600 font-medium block mb-1">Description:</span>
+                                        <p class="text-gray-900 bg-white p-3 rounded border border-gray-200">{{ transaction.description }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <form method="post" class="mt-8">
+                            {% csrf_token %}
+                            <div class="flex gap-4">
+    <button type="submit" class="flex-1 px-8 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl border">
+        Delete Transaction
+    </button>
+    <a href="{% url 'transactions' %}" class="flex-1 px-8 py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center flex items-center justify-center border">
+        Cancel
+    </a>
+</div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </main>
+    </div>
+
+    <script>
+        // Only run script if we're on the transactions list page
+        if (document.getElementById('transactionTableBody')) {
+            let currentType = '{{ transaction_type|default:"" }}';
+            
+            function performSearch() {
+                const searchQuery = document.getElementById('searchInput').value;
+                const url = new URL('{% url "search_transactions_ajax" %}', window.location.origin);
+                
+                if (searchQuery) {
+                    url.searchParams.append('search', searchQuery);
+                }
+                if (currentType) {
+                    url.searchParams.append('type', currentType);
+                }
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('transactionTableBody').innerHTML = data.html;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+            
+            // Search input with debounce
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performSearch, 300);
+            });
+            
+            // Search button
+            document.getElementById('searchButton').addEventListener('click', performSearch);
+            
+            // Filter buttons
+            document.getElementById('filterAll').addEventListener('click', function() {
+                currentType = '';
+                updateFilterButtons();
+                performSearch();
+            });
+            
+            document.getElementById('filterIncome').addEventListener('click', function() {
+                currentType = 'INCOME';
+                updateFilterButtons();
+                performSearch();
+            });
+            
+            document.getElementById('filterExpense').addEventListener('click', function() {
+                currentType = 'EXPENSE';
+                updateFilterButtons();
+                performSearch();
+            });
+            
+            function updateFilterButtons() {
+                // Reset all buttons
+                document.getElementById('filterAll').classList.remove('bg-gray-400', 'font-semibold');
+                document.getElementById('filterAll').classList.add('bg-gray-200');
+                document.getElementById('filterIncome').classList.remove('bg-green-400', 'font-semibold');
+                document.getElementById('filterIncome').classList.add('bg-green-200');
+                document.getElementById('filterExpense').classList.remove('bg-red-400', 'font-semibold');
+                document.getElementById('filterExpense').classList.add('bg-red-200');
+                
+                if (currentType === '') {
+                    document.getElementById('filterAll').classList.remove('bg-gray-200');
+                    document.getElementById('filterAll').classList.add('bg-gray-400', 'font-semibold');
+                } else if (currentType === 'INCOME') {
+                    document.getElementById('filterIncome').classList.remove('bg-green-200');
+                    document.getElementById('filterIncome').classList.add('bg-green-400', 'font-semibold');
+                } else if (currentType === 'EXPENSE') {
+                    document.getElementById('filterExpense').classList.remove('bg-red-200');
+                    document.getElementById('filterExpense').classList.add('bg-red-400', 'font-semibold');
+                }
+            }
+            
+            updateFilterButtons();
+        }
+    </script>
+</body>
+</html>
